@@ -1,15 +1,15 @@
 {
   "name": "grow-garden-stock-bot",
   "version": "1.0.0",
-  "description": "Bot to fetch and post Grow a Garden stock to Discord.",
+  "description": "Discord bot that posts Grow a Garden seed and gear stock updates every 5 minutes",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^14.11.0",
-    "dotenv": "^16.3.1",
-    "node-fetch": "^3.3.2"
-  },
-  "type": "module"
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.4.5",
+    "puppeteer": "^21.3.8"
+  }
 }
