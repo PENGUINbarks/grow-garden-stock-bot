@@ -1,6 +1,22 @@
-require('dotenv').config();
+// Required dependencies
 const { Client, GatewayIntentBits } = require('discord.js');
+const express = require('express');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+require('dotenv').config();
 
+// ✅ Create web server to keep bot alive on Render
+const app = express();
+app.get('/', (req, res) => res.send('🌱 Grow A Garden bot is alive!'));
+app.listen(3000, () => {
+  console.log('🌐 Web server running on port 3000');
+});
+
+// ✅ Self-ping every 5 minutes to keep bot active
+setInterval(() => {
+  fetch('https://your-render-url.onrender.com'); // ⬅️ Replace with your actual Render URL
+}, 5 * 60 * 1000);
+
+// ✅ Create Discord client with needed intents
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -9,65 +25,42 @@ const client = new Client({
   ]
 });
 
-const stockMessage = () => {
-  return `🌱 **Grow A Garden Stock Update** 🌱
-
-**🫘 SEEDS:**
-- Carrot Seed 🥕 — 45
-- Tomato Seed 🍅 — 62
-- Cabbage Seed 🥬 — 53
-- Sunflower Seed 🌻 — 27
-- Onion Seed 🧅 — 31
-- Lettuce Seed 🥗 — 44
-- Corn Seed 🌽 — 39
-- Potato Seed 🥔 — 36
-- Pepper Seed 🌶️ — 20
-- Watermelon Seed 🍉 — 18
-- Strawberry Seed 🍓 — 24
-- Radish Seed ❤️ — 11
-
-**🛠️ GEAR:**
-- Watering Can 💧 — 28
-- Golden Watering Can ✨ — 5
-- Shovel 🪣 — 17
-- Super Shovel 🔥 — 3
-- Scarecrow 🪆 — 9
-- Compost Bag 🧤 — 14
-- Sprinkler 💦 — 7
-- Magic Fertilizer ✨ — 2
-- Greenhouse 🌿 — 1
-
-🕒 **Updated every 5 minutes**
-📅 Last synced: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}
-`;
-};
-
-const STOCK_INTERVAL = 5 * 60 * 1000;
-
-client.once('ready', async () => {
+// ✅ When bot is ready
+client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
-
-  const guilds = await client.guilds.fetch();
-
-  for (const [guildId] of guilds) {
-    const guild = await client.guilds.fetch(guildId);
-    const channels = await guild.channels.fetch();
-
-    const stockChannel = channels.find(
-      (channel) => channel.name === process.env.CHANNEL_NAME && channel.isTextBased()
-    );
-
-    if (!stockChannel) {
-      console.error(`❌ Channel "${process.env.CHANNEL_NAME}" not found in ${guild.name}`);
-      continue;
-    }
-
-    stockChannel.send(stockMessage());
-
-    setInterval(() => {
-      stockChannel.send(stockMessage());
-    }, STOCK_INTERVAL);
-  }
+  updateStock(); // Run once at startup
+  setInterval(updateStock, 5 * 60 * 1000); // Run every 5 minutes
 });
 
+// ✅ Stock update function
+async function updateStock() {
+  const channel = client.channels.cache.find(c => c.name === 'grow-a-garden-stock');
+  if (!channel) return console.log("❌ Channel 'grow-a-garden-stock' not found");
+
+  try {
+    const res = await fetch('https://api.growagarden.com/stock'); // Replace with real API if available
+    const data = await res.json();
+
+    const stockMessage = `
+🌾 **Grow A Garden Stock Update**
+🪴 Seeds: ${data.seeds.join(', ')}
+⚙️ Gear: ${data.gear.join(', ')}
+⏰ Last updated: <t:${Math.floor(Date.now() / 1000)}:R>
+    `.trim();
+
+    // Delete previous messages (optional, if you want only one)
+    const messages = await channel.messages.fetch({ limit: 10 });
+    const botMessages = messages.filter(msg => msg.author.id === client.user.id);
+    await Promise.all(botMessages.map(msg => msg.delete()));
+
+    // Send new stock update
+    await channel.send(stockMessage);
+    console.log("✅ Stock posted successfully!");
+  } catch (err) {
+    console.error("❌ Failed to fetch/post stock:", err);
+  }
+}
+
+// ✅ Log in with token from environment variable
 client.login(process.env.DISCORD_TOKEN);
+
