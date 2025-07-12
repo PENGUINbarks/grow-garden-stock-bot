@@ -37,7 +37,7 @@ const stockMessage = () => {
 - Magic Fertilizer ✨ — 2
 - Greenhouse 🌿 — 1
 
-🕒 **Updated every 10 minutes**
+🕒 **Updated every 5 minutes**
 📅 Last synced: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}
 `;
 };
