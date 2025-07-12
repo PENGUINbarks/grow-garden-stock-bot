@@ -42,7 +42,7 @@ const stockMessage = () => {
 `;
 };
 
-const STOCK_INTERVAL = 10 * 60 * 1000;
+const STOCK_INTERVAL = 5 * 60 * 1000;
 
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
