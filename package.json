@@ -1,15 +1,13 @@
 {
-  "name": "grow-garden-stock-bot",
+  "name": "safe-chat-bot",
   "version": "1.0.0",
-  "description": "Discord bot that posts Grow a Garden stock updates",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.4.5",
-    "puppeteer": "^22.7.0"
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.3.1"
   }
 }
